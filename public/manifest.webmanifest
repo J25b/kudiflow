@@ -1,0 +1,13 @@
+{
+  "name": "KudiFlow",
+  "short_name": "KudiFlow",
+  "description": "AI-powered personal finance tracker",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7f0",
+  "theme_color": "#0d9488",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "64x64 32x32 24x24 16x16", "type": "image/x-icon" }
+  ]
+}

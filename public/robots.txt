@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /expenses
+Disallow: /budgets
+Disallow: /analytics
+Disallow: /insights
+Disallow: /settings
+
+Sitemap: /sitemap.xml
