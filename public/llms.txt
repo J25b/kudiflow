@@ -1,0 +1,6 @@
+# KudiFlow
+
+> AI-powered personal finance PWA that helps users understand, monitor, and improve their spending habits.
+
+## Pages
+- [Home](/): Landing page and app entry point
