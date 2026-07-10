@@ -81,10 +81,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "KudiFlow — AI-powered personal finance" },
       {
         property: "og:description",
-        content: "Track expenses, set budgets, and get AI-powered insights on your spending.",
+        content: "Track expenses, set budgets, and get AI-powered insights on your spending with KudiFlow.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "KudiFlow — AI-powered personal finance" },
+      { name: "twitter:description", content: "Track expenses, set budgets, and get AI-powered insights on your spending with KudiFlow." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
