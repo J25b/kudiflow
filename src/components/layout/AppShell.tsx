@@ -76,15 +76,20 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between border-b bg-background/80 backdrop-blur px-4 h-14">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-gradient-brand flex items-center justify-center">
+          <Link to="/dashboard" className="flex items-center gap-2 min-w-0">
+            <div className="h-8 w-8 shrink-0 rounded-xl bg-gradient-brand flex items-center justify-center shadow-glow">
               <Wallet className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold">KudiFlow</span>
+            <span className="font-display font-bold text-gradient-brand truncate">KudiFlow</span>
           </Link>
-          <Button variant="ghost" size="icon" onClick={toggle}>
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1 shrink-0">
+            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign out">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </header>
 
         <main className="flex-1 pb-20 lg:pb-0">{children}</main>
