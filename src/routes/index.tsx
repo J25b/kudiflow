@@ -71,10 +71,24 @@ const features = [
 
 function LandingPage() {
   const [signedIn, setSignedIn] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-  }, []);
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        navigate({ to: "/dashboard", replace: true });
+      } else {
+        setSignedIn(false);
+      }
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        navigate({ to: "/dashboard", replace: true });
+      }
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
 
   const primaryHref = signedIn ? "/dashboard" : "/auth";
   const primaryLabel = signedIn ? "Open dashboard" : "Get started free";
