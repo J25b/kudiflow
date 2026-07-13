@@ -10,11 +10,23 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Wallet } from "lucide-react";
 
+function safeNext(next: unknown): string | null {
+  if (typeof next !== "string" || !next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  beforeLoad: async () => {
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : undefined,
+  }),
+  beforeLoad: async ({ search }) => {
     const { data } = await supabase.auth.getSession();
-    if (data.session) throw redirect({ to: "/dashboard" });
+    if (data.session) {
+      const next = safeNext(search.next);
+      if (next) throw redirect({ href: next });
+      throw redirect({ to: "/dashboard" });
+    }
   },
   head: () => ({
     meta: [
@@ -27,10 +39,17 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const next = safeNext(search.next);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+
+  const goNext = () => {
+    if (next) window.location.href = next;
+    else navigate({ to: "/dashboard" });
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,30 +57,32 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    navigate({ to: "/dashboard" });
+    goNext();
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const emailRedirectTo = next ? `${window.location.origin}${next}` : window.location.origin;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo,
         data: { full_name: fullName },
       },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome to KudiFlow!");
-    navigate({ to: "/dashboard" });
+    goNext();
   };
 
   const handleGoogle = async () => {
     setLoading(true);
+    const redirectUri = next ? `${window.location.origin}${next}` : window.location.origin;
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: redirectUri,
     });
     if (result.error) {
       setLoading(false);
@@ -69,8 +90,9 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/dashboard" });
+    goNext();
   };
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
