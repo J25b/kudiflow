@@ -77,22 +77,6 @@ function AuthPage() {
     goNext();
   };
 
-  const handleGoogle = async () => {
-    setLoading(true);
-    const redirectUri = next ? `${window.location.origin}${next}` : window.location.origin;
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: redirectUri,
-    });
-    if (result.error) {
-      setLoading(false);
-      toast.error(result.error.message || "Google sign-in failed");
-      return;
-    }
-    if (result.redirected) return;
-    goNext();
-  };
-
-
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-brand text-primary-foreground">
