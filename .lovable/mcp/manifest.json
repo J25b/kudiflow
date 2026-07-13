@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://gfqddvprwfnyinkytjea.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "kudiflow-mcp",
+      "version": "0.1.0",
+      "title": "KudiFlow"
+    },
+    "tools": [
+      {
+        "name": "list_expenses",
+        "title": "List expenses",
+        "description": "List the signed-in user's recent expenses, most recent first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Max rows to return (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "since": {
+              "description": "Optional ISO date; only expenses on or after this date.",
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_expense",
+        "title": "Create expense",
+        "description": "Record a new expense for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What the expense is for."
+            },
+            "amount": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Amount in the user's currency."
+            },
+            "transaction_date": {
+              "description": "ISO date (YYYY-MM-DD). Defaults to today.",
+              "type": "string"
+            },
+            "payment_method": {
+              "description": "e.g. cash, card, transfer.",
+              "type": "string"
+            },
+            "category_id": {
+              "description": "Optional category UUID (use list_categories).",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "description",
+            "amount"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_categories",
+        "title": "List categories",
+        "description": "List the signed-in user's expense categories.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_budgets",
+        "title": "List budgets",
+        "description": "List the signed-in user's budgets.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "spending_summary",
+        "title": "Spending summary",
+        "description": "Summarize the signed-in user's spending over a date range, with totals per category.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "start_date": {
+              "type": "string",
+              "description": "ISO date (YYYY-MM-DD) start of range, inclusive."
+            },
+            "end_date": {
+              "type": "string",
+              "description": "ISO date (YYYY-MM-DD) end of range, inclusive."
+            }
+          },
+          "required": [
+            "start_date",
+            "end_date"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
