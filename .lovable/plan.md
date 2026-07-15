@@ -1,102 +1,96 @@
-# KudiFlow MVP — Implementation Plan
 
-A production-ready AI-powered personal finance PWA. Stack: TanStack Start (React 19 + TS + Vite), Tailwind v4 + shadcn/ui, Lovable Cloud (Supabase) for auth/DB/edge, Lovable AI Gateway for insights (server-side only).
+# KudiFlow — Launch Polish Plan
 
-Note on a few prompt items adapted to this stack:
-- "Supabase Edge Functions" for AI → we use TanStack `createServerFn` handlers as the secure BFF. They run server-side, hold secrets, and satisfy the same "no keys in browser" guarantee. Edge Functions aren't the default in TanStack Start.
-- "OpenAI directly" → we route through Lovable AI Gateway (OpenAI-compatible) so no user-supplied key is needed and the key stays server-side. Model: `google/gemini-2.5-flash` (fast, cost-effective) by default.
-- "Vite PWA plugin" → manifest + icons for installability by default. Full offline service worker only if you confirm — Lovable preview needs guarded registration.
+Scope: UX/UI refinement only. No new features, no schema/RLS/auth-provider changes, no business logic edits. Existing routes, server functions, MCP tools, and Supabase integration stay intact.
 
-## Phases
+---
 
-1. **Foundation** — Enable Lovable Cloud, design system (fintech palette, light/dark), app shell with bottom nav (mobile) + sidebar (desktop), routes scaffolding, PWA manifest + icons.
-2. **Auth** — Email/password + Google via Lovable broker. `/auth` public route. `_authenticated` layout gate (managed). Profile row auto-created via trigger.
-3. **Data layer** — Schema, RLS, seed categories. TanStack Query wiring.
-4. **Expenses** — CRUD, search, filter, category picker, payment method, date.
-5. **Budgets** — CRUD, per-category monthly budgets, progress bars, over-budget warnings.
-6. **Dashboard** — Today/week/month totals, recent transactions, category breakdown, budget summary — all live from user data with empty states.
-7. **Analytics** — Recharts: category pie, daily/weekly/monthly bars, trend line, budget utilization.
-8. **AI Insights** — Server fn `generateInsights` pulls user's expenses via `requireSupabaseAuth`, calls Lovable AI, returns structured insights. Refuses to fabricate when data is sparse.
-9. **Settings** — Profile, notification prefs, theme toggle, sign-out.
-10. **Polish** — Empty states, loading skeletons, toasts, error boundaries, SEO metadata per route, sitemap/robots/llms.
+## Part 1 — UX Audit (findings)
 
-## Database schema (public schema, RLS + GRANTs)
+### High priority
+1. **Auth pages** — technical validation errors surface raw Supabase messages; no email-exists precheck; no "resend verification" UI; no visible email-verification gate on sign-in; no "Remember me"; password strength meter missing.
+2. **Empty states** — Dashboard/Expenses/Budgets/Insights show terse "No data" style copy. No education, no next-step guidance, no illustration.
+3. **Dashboard** — Stat cards are numbers-only; no plain-language narrative ("Your biggest category is Food, 34%"). No first-run onboarding tour.
+4. **Microcopy** — System-y labels everywhere ("Add expense", "Create budget", "Generate"). Buttons/headings need conversational rewrite.
+5. **AI Insights empty state** — Doesn't explain why insights are missing when data is thin.
+6. **Mobile bottom nav** — 5 tabs including Settings; Insights (a signature feature) is hidden. Sign-out only in mobile header (already fixed) but no user avatar/menu.
+7. **Loading UX** — Route overlay exists, but list/card loads have no skeletons.
 
-```
-profiles(id uuid PK → auth.users, full_name, avatar_url, currency default 'NGN',
-         notification_prefs jsonb, created_at, updated_at)
-categories(id uuid PK, user_id uuid FK, name, icon, color, is_default bool, created_at)
-  -- default categories seeded per-user via trigger on signup
-expenses(id uuid PK, user_id uuid FK, amount numeric(12,2), category_id uuid FK,
-         description text, payment_method text, notes text,
-         transaction_date date, created_at, updated_at)
-budgets(id uuid PK, user_id uuid FK, category_id uuid FK nullable,
-        amount numeric(12,2), period text check in ('monthly'),
-        start_date date, created_at, updated_at)
-ai_insights(id uuid PK, user_id uuid FK, kind text, content jsonb,
-            generated_at timestamptz, period_start date, period_end date)
-```
+### Medium priority
+8. Form density on Expenses/Budgets dialogs — labels/spacing feel dense on mobile; no inline hints.
+9. Toasts use generic wording; no positive-behavior celebrations (streaks, budget wins).
+10. PWA install prompt copy is functional but not warm.
+11. Focus rings inconsistent on custom buttons/links; some icon-only buttons still miss `aria-label`.
+12. Landing page CTA doesn't reflect signed-in state consistently.
+13. Reset-password page copy is transactional, not reassuring.
 
-RLS: every table `user_id = auth.uid()` for all ops. GRANTs to `authenticated` + `service_role`. Trigger `handle_new_user()` creates profile + seeds default categories (Food, Transport, Bills, Entertainment, Shopping, Health, Other).
+### Low priority
+14. Typography scale — headings could use a slightly warmer display treatment; body line-height tightening on cards.
+15. No subtle motion on stat cards / list rows on mount.
+16. Analytics charts lack a one-line "what this means" caption.
+17. `Insights` page: no history of previous insights shown (already stored in `ai_insights`).
 
-## Server functions (BFF — secrets stay server-side)
+---
 
-- `src/lib/insights.functions.ts` — `generateInsights` with `requireSupabaseAuth`: fetches user's expenses/budgets via `context.supabase`, calls Lovable AI Gateway via `createLovableAiGatewayProvider(process.env.LOVABLE_API_KEY)`, returns `{ summary, patterns[], recommendations[] }`. Refuses when < N transactions.
-- `src/lib/insights.server.ts` — prompt builder, schema (zod), aggregation helpers.
+## Part 2 — Implementation phases
 
-All other CRUD uses the browser Supabase client + RLS directly (standard pattern; no keys exposed).
+I'll ship in small, verifiable phases. Each phase is frontend-only.
 
-## Folder structure
+### Phase A — Authentication experience (High-priority #1)
+- Rewrite `src/routes/auth.tsx`:
+  - Real-time zod validation (already partial) + password strength meter component.
+  - Friendly error mapping: translate Supabase codes (`invalid_credentials`, `email_not_confirmed`, `user_already_registered`, `over_email_send_rate_limit`) → warm sentences.
+  - After sign-up: show "Check your inbox" panel with **Resend verification** button (calls `supabase.auth.resend`).
+  - On sign-in with `email_not_confirmed`: inline banner + resend button (no toast-only).
+  - Trust strip: "Bank-grade encryption · Your data is yours · Never shared".
+  - "Remember me" checkbox (Supabase persists by default; toggle controls `localStorage` vs `sessionStorage` via a thin wrapper — no client.ts edit; use `supabase.auth.setSession` persistence is not toggleable at runtime, so implement as UX-only checkbox that on uncheck signs out on `visibilitychange=hidden` after 30 min idle).
+- Rewrite `src/routes/reset-password.tsx` copy + add strength meter + success confirmation screen.
+- New component `src/components/auth/PasswordStrength.tsx`.
+- New helper `src/lib/auth-errors.ts` — maps error codes to human copy.
 
-```
-src/
-  routes/
-    __root.tsx, index.tsx (redirect to dashboard or /auth)
-    auth.tsx
-    _authenticated/
-      route.tsx (managed)
-      dashboard.tsx
-      expenses.tsx, expenses.new.tsx
-      budgets.tsx
-      analytics.tsx
-      insights.tsx
-      settings.tsx
-    sitemap[.]xml.ts
-  components/
-    layout/ (AppShell, BottomNav, Sidebar, TopBar)
-    dashboard/, expenses/, budgets/, analytics/, insights/
-    ui/ (shadcn)
-    empty-states/
-  lib/
-    insights.functions.ts, insights.server.ts
-    ai-gateway.server.ts
-    format.ts (currency, dates)
-    queries.ts (queryOptions builders)
-  hooks/ (use-expenses, use-budgets, use-profile, use-theme)
-  integrations/supabase/ (managed)
-public/
-  manifest.webmanifest, icons/, robots.txt
-```
+### Phase B — Conversational microcopy pass
+- Sidebar/nav labels stay short (Dashboard/Expenses/Budgets/Analytics/Insights/Settings) — those ARE the wayfinding. Change **headings, subtitles, button labels, empty states, toasts** only, so nav remains scannable.
+- Files: `dashboard.tsx`, `expenses.tsx`, `budgets.tsx`, `analytics.tsx`, `insights.tsx`, `settings.tsx`, `EmptyState.tsx` usage sites.
+- Replace toast strings via a small `src/lib/copy.ts` dictionary so tone is consistent.
 
-## Design system
+### Phase C — Empty states + first-run onboarding
+- Upgrade `EmptyState` to accept an illustration slot; add gentle SVG glyphs.
+- Dashboard empty → "Let's start building your financial story…" with 2 CTAs (Add first expense / Set a budget).
+- Insights empty (thin data) → "I'm still learning your spending habits. Add a few more transactions…" — detect via `expenses.length < 5`.
+- New lightweight **first-run checklist card** on dashboard: (1) Add first expense (2) Set a monthly budget (3) Generate first insight. Dismissible, persisted in `localStorage`. No schema change.
 
-Fintech-modern, distinctive (not generic purple-on-white):
-- Primary: deep teal/emerald (financial trust, non-cliché)
-- Accent: warm amber for highlights/CTAs
-- Neutral: slate with warm undertone
-- oklch tokens in `src/styles.css`, full dark mode
-- Typography: Space Grotesk (headings) + Inter (body) via `<link>` in root
-- Rounded-2xl cards, soft shadows, subtle motion
-- Custom Button variants (hero, ghost-accent), Card variants (stat, chart)
+### Phase D — Dashboard narrative + mobile nav
+- Add `NarrativeSummary` component on dashboard: computes top category %, week vs last week delta, budget status → renders 1–2 sentence plain-language summary above the stat grid.
+- Add celebration chip when user is under budget or has a tracking streak (computed from existing expenses).
+- Mobile bottom nav: swap Settings out of the 5-slot for **Insights**; move Settings into a "More" affordance in the mobile header (avatar menu). Keeps parity with desktop sidebar's 6 items.
 
-## PWA scope
+### Phase E — Loading skeletons + motion
+- Skeleton components for stat cards, list rows, chart area.
+- Subtle fade/slide-in on card mount using Tailwind's `animate-in` utilities (already available via tailwindcss-animate).
 
-Default: manifest + icons + theme-color for installability ("Add to Home Screen", app icon). **No service worker unless you confirm offline** — SW in Lovable preview needs guarded registration and adds complexity. Say the word and I'll add guarded `vite-plugin-pwa` with NetworkFirst navigations.
+### Phase F — Accessibility + PWA copy
+- Sweep icon-only buttons for `aria-label`.
+- Ensure focus-visible rings on links/cards.
+- Verify color contrast on brand gradient text.
+- Warm up PWA install prompt copy + iOS hint.
 
-## Out of scope (per your list)
-Bank/Open Banking, SMS parsing, OCR, receipts, subscriptions, investments, family, multi-currency — schema leaves room for these.
+### Phase G — Polish
+- Analytics: one-line caption under each chart explaining what it shows.
+- Insights page: list previous insights from `ai_insights` table (already queryable via existing client — read-only, no schema change).
+- Reset-password + auth pages: subtle trust iconography.
 
-## What I'll ship first turn after approval
-Phases 1–3 (foundation, auth, schema + RLS + seeds) so you can sign in and land on an empty dashboard. Then 4→9 in subsequent turns, each verified.
+---
 
-**One confirmation needed:** PWA scope — manifest-only (default) or full offline SW?
+## Verification
+After each phase: `bunx tsgo --noEmit`, spot-check preview via Playwright screenshots on mobile (573×855) and desktop.
+
+## Non-goals (explicit)
+- No changes to: database schema, RLS, GRANTs, `src/integrations/supabase/*`, `.env`, MCP tools, server functions' logic, auth provider config, `supabase/config.toml`.
+- No new routes except potentially `_authenticated/onboarding.tsx` if the checklist grows — kept optional.
+- No new dependencies unless a phase strictly needs one (none anticipated).
+
+---
+
+**Estimated shipping order:** A → B → C → D → E → F → G, each in its own turn so you can review between phases.
+
+Approve to start with **Phase A (Authentication experience)** — or tell me which phase to prioritize first.
