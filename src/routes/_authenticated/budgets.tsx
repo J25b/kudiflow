@@ -53,21 +53,24 @@ function BudgetsPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["budgets"] });
-      toast.success("Budget deleted");
+      toast.success("Budget removed.");
     },
+    onError: () => toast.error("We couldn't remove that budget. Try again in a moment."),
   });
+
 
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-display font-bold">Budgets</h1>
-          <p className="text-sm text-muted-foreground mt-1">Monthly spending limits</p>
+          <h1 className="text-2xl lg:text-3xl font-display font-bold">Your budgets</h1>
+          <p className="text-sm text-muted-foreground mt-1">A gentle limit for each part of your month.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> New budget</Button></DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Create budget</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Set a monthly limit</DialogTitle></DialogHeader>
+
             <BudgetForm
               categories={categories}
               existingCategoryIds={budgets.map((b) => (b.category as { id: string } | null)?.id).filter(Boolean) as string[]}
@@ -80,9 +83,10 @@ function BudgetsPage() {
       {budgets.length === 0 ? (
         <EmptyState
           icon={Target}
-          title="No budgets yet"
-          description="Set a monthly budget for a category to track your progress and get warnings before you overspend."
+          title="Give your money a plan"
+          description="Pick a category, set what feels comfortable to spend this month, and we'll nudge you before you get close to the line."
         />
+
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {budgets.map((b) => {
@@ -104,15 +108,19 @@ function BudgetsPage() {
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-2xl font-display font-bold">{formatCurrency(spent, currency)}</span>
-                  <span className="text-sm text-muted-foreground">of {formatCurrency(Number(b.amount), currency)}</span>
+                  <span className="text-sm text-muted-foreground">spent of {formatCurrency(Number(b.amount), currency)}</span>
                 </div>
                 <Progress value={pct} className={`h-2 ${over ? "[&>*]:bg-destructive" : ""}`} />
                 {over && (
-                  <p className="text-xs text-destructive flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Over budget by {formatCurrency(spent - Number(b.amount), currency)}</p>
+                  <p className="text-xs text-destructive flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> You're {formatCurrency(spent - Number(b.amount), currency)} past this limit</p>
                 )}
                 {warning && (
-                  <p className="text-xs text-accent-foreground flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> {Math.round(pct)}% used — approaching limit</p>
+                  <p className="text-xs text-accent-foreground flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> You've used {Math.round(pct)}% — worth easing off here</p>
                 )}
+                {!over && !warning && (
+                  <p className="text-xs text-muted-foreground">{formatCurrency(Math.max(0, Number(b.amount) - spent), currency)} still available this month.</p>
+                )}
+
               </Card>
             );
           })}
@@ -139,10 +147,10 @@ function BudgetForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
-    if (!(amt > 0)) return toast.error("Enter a valid amount");
+    if (!(amt > 0)) return toast.error("Choose an amount above zero to aim for.");
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSaving(false); return; }
+    if (!user) { setSaving(false); return toast.error("Your session ended. Please sign in again."); }
     const { error } = await supabase.from("budgets").insert({
       user_id: user.id,
       category_id: categoryId || null,
@@ -151,19 +159,19 @@ function BudgetForm({
       start_date: toISODate(startOfMonth()),
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Budget created");
+    if (error) return toast.error("We couldn't save that budget. Please try again.");
+    toast.success("Budget set — we'll keep an eye on it for you.");
     onDone();
   };
 
   if (available.length === 0) {
-    return <p className="text-sm text-muted-foreground">You already have a budget for every category.</p>;
+    return <p className="text-sm text-muted-foreground">Every category already has a budget. Remove one first if you'd like to change it.</p>;
   }
 
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-2">
-        <Label>Category</Label>
+        <Label>Which category?</Label>
         <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -172,10 +180,12 @@ function BudgetForm({
         </Select>
       </div>
       <div className="space-y-2">
-        <Label>Monthly amount</Label>
+        <Label>How much per month?</Label>
         <Input type="number" min="0" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <p className="text-xs text-muted-foreground">You can change this any time — nothing is locked in.</p>
       </div>
-      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving..." : "Create budget"}</Button>
+      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Setting your budget..." : "Set budget"}</Button>
     </form>
   );
 }
+

@@ -24,15 +24,16 @@ function AnalyticsPage() {
   if (expenses.length === 0) {
     return (
       <div className="p-4 lg:p-8 max-w-5xl mx-auto space-y-6">
-        <h1 className="text-2xl lg:text-3xl font-display font-bold">Analytics</h1>
+        <h1 className="text-2xl lg:text-3xl font-display font-bold">Where your money goes</h1>
         <EmptyState
           icon={PieChartIcon}
-          title="No data to analyze yet"
-          description="Add a few expenses to see your spending broken down by category, day, and month."
+          title="Your charts are waiting"
+          description="Log a handful of expenses and this page fills in with clear pictures of your spending by category, day and month."
         />
       </div>
     );
   }
+
 
   // By category
   const catMap = new Map<string, { name: string; value: number; color: string }>();
@@ -73,11 +74,15 @@ function AnalyticsPage() {
 
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl lg:text-3xl font-display font-bold">Analytics</h1>
+      <div>
+        <h1 className="text-2xl lg:text-3xl font-display font-bold">Where your money goes</h1>
+        <p className="text-sm text-muted-foreground mt-1">A closer look at your habits over time.</p>
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-4">
         <Card className="p-5">
-          <h3 className="font-semibold mb-4">Spending by category</h3>
+          <h3 className="font-semibold mb-4">What you spend most on</h3>
+
           <div className="h-64">
             <ResponsiveContainer>
               <PieChart>
@@ -100,7 +105,7 @@ function AnalyticsPage() {
         </Card>
 
         <Card className="p-5">
-          <h3 className="font-semibold mb-4">Last 14 days</h3>
+          <h3 className="font-semibold mb-4">Your last two weeks</h3>
           <div className="h-64">
             <ResponsiveContainer>
               <BarChart data={dailyData}>
@@ -115,7 +120,7 @@ function AnalyticsPage() {
         </Card>
 
         <Card className="p-5 lg:col-span-2">
-          <h3 className="font-semibold mb-4">Monthly trend</h3>
+          <h3 className="font-semibold mb-4">How you're trending month to month</h3>
           <div className="h-64">
             <ResponsiveContainer>
               <LineChart data={monthlyData}>

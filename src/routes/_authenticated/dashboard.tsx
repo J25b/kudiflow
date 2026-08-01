@@ -59,7 +59,7 @@ function Dashboard() {
           <h1 className="text-2xl lg:text-3xl font-display font-bold">
             {greeting()}, {profile?.full_name?.split(" ")[0] ?? "there"}
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">Here's your money at a glance.</p>
+          <p className="text-muted-foreground text-sm mt-1">Here's how your money is doing today.</p>
         </div>
         <Button asChild>
           <Link to="/expenses"><Plus className="h-4 w-4 mr-1" /> Add expense</Link>
@@ -69,45 +69,50 @@ function Dashboard() {
       {empty ? (
         <EmptyState
           icon={Wallet}
-          title="Start tracking your spending"
-          description="Add your first expense to see your dashboard come to life with real insights."
+          title="Welcome to KudiFlow"
+          description="Add one expense and this page comes alive — daily totals, budget progress, and where your money actually goes."
           action={
-            <Button asChild size="lg"><Link to="/expenses"><Plus className="h-4 w-4 mr-1" /> Add first expense</Link></Button>
+            <Button asChild size="lg"><Link to="/expenses"><Plus className="h-4 w-4 mr-1" /> Log my first expense</Link></Button>
           }
         />
+
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            <StatCard label="Today" value={formatCurrency(totalToday, currency)} icon={Receipt} />
-            <StatCard label="This week" value={formatCurrency(totalWeek, currency)} icon={TrendingUp} />
-            <StatCard label="This month" value={formatCurrency(totalMonth, currency)} icon={Wallet} highlight />
-            <StatCard label="Total budget" value={formatCurrency(totalBudget, currency)} icon={Target} />
+            <StatCard label="Spent today" value={formatCurrency(totalToday, currency)} icon={Receipt} />
+            <StatCard label="So far this week" value={formatCurrency(totalWeek, currency)} icon={TrendingUp} />
+            <StatCard label="So far this month" value={formatCurrency(totalMonth, currency)} icon={Wallet} highlight />
+            <StatCard label="Budgeted this month" value={formatCurrency(totalBudget, currency)} icon={Target} />
           </div>
 
           {totalBudget > 0 && (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold">Monthly budget</h3>
+                <h3 className="font-semibold">How your month is tracking</h3>
                 <span className="text-sm text-muted-foreground">
                   {formatCurrency(totalMonth, currency)} of {formatCurrency(totalBudget, currency)}
                 </span>
               </div>
               <Progress value={budgetPct} className="h-3" />
               <p className="text-xs text-muted-foreground mt-2">
-                {budgetPct >= 100 ? "You've exceeded your total budget for this month." : `${Math.round(100 - budgetPct)}% of budget remaining.`}
+                {budgetPct >= 100
+                  ? "You've gone past your total budget this month — worth a quick look at your categories."
+                  : `You still have ${formatCurrency(totalBudget - totalMonth, currency)} to spend before you reach your limit.`}
               </p>
             </Card>
           )}
 
+
           <div className="grid lg:grid-cols-2 gap-4">
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Top categories this month</h3>
-                <Link to="/analytics" className="text-xs text-primary flex items-center gap-1">View all <ArrowUpRight className="h-3 w-3" /></Link>
+                <h3 className="font-semibold">Where it went this month</h3>
+                <Link to="/analytics" className="text-xs text-primary flex items-center gap-1">See more <ArrowUpRight className="h-3 w-3" /></Link>
               </div>
               {topCategories.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No spending yet this month.</p>
+                <p className="text-sm text-muted-foreground">Nothing logged this month yet.</p>
               ) : (
+
                 <div className="space-y-3">
                   {topCategories.map((c) => {
                     const pct = totalMonth > 0 ? (c.total / totalMonth) * 100 : 0;
@@ -132,9 +137,10 @@ function Dashboard() {
 
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Recent transactions</h3>
-                <Link to="/expenses" className="text-xs text-primary flex items-center gap-1">View all <ArrowUpRight className="h-3 w-3" /></Link>
+                <h3 className="font-semibold">Your latest entries</h3>
+                <Link to="/expenses" className="text-xs text-primary flex items-center gap-1">See all <ArrowUpRight className="h-3 w-3" /></Link>
               </div>
+
               <div className="space-y-3">
                 {expenses.slice(0, 6).map((e) => {
                   const cat = e.category as { name: string; color: string } | null;
