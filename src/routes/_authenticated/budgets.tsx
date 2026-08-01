@@ -147,10 +147,10 @@ function BudgetForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
-    if (!(amt > 0)) return toast.error("Enter a valid amount");
+    if (!(amt > 0)) return toast.error("Choose an amount above zero to aim for.");
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSaving(false); return; }
+    if (!user) { setSaving(false); return toast.error("Your session ended. Please sign in again."); }
     const { error } = await supabase.from("budgets").insert({
       user_id: user.id,
       category_id: categoryId || null,
@@ -159,19 +159,19 @@ function BudgetForm({
       start_date: toISODate(startOfMonth()),
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Budget created");
+    if (error) return toast.error("We couldn't save that budget. Please try again.");
+    toast.success("Budget set — we'll keep an eye on it for you.");
     onDone();
   };
 
   if (available.length === 0) {
-    return <p className="text-sm text-muted-foreground">You already have a budget for every category.</p>;
+    return <p className="text-sm text-muted-foreground">Every category already has a budget. Remove one first if you'd like to change it.</p>;
   }
 
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-2">
-        <Label>Category</Label>
+        <Label>Which category?</Label>
         <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -180,10 +180,12 @@ function BudgetForm({
         </Select>
       </div>
       <div className="space-y-2">
-        <Label>Monthly amount</Label>
+        <Label>How much per month?</Label>
         <Input type="number" min="0" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <p className="text-xs text-muted-foreground">You can change this any time — nothing is locked in.</p>
       </div>
-      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving..." : "Create budget"}</Button>
+      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Setting your budget..." : "Set budget"}</Button>
     </form>
   );
 }
+
