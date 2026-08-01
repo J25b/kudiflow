@@ -45,9 +45,10 @@ function ExpensesPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["expenses"] });
-      toast.success("Expense deleted");
+      toast.success("Gone. That expense is off your list.");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: () => toast.error("We couldn't remove that just now. Give it another try?"),
+
   });
 
   const filtered = expenses.filter((e) => {
@@ -60,15 +61,20 @@ function ExpensesPage() {
     <div className="p-4 lg:p-8 space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-display font-bold">Expenses</h1>
-          <p className="text-sm text-muted-foreground mt-1">{filtered.length} transactions</p>
+          <h1 className="text-2xl lg:text-3xl font-display font-bold">Your spending</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {filtered.length === 0
+              ? "Nothing to show here yet."
+              : `${filtered.length} ${filtered.length === 1 ? "expense" : "expenses"} logged`}
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-1" /> Add</Button>
+            <Button><Plus className="h-4 w-4 mr-1" /> Add expense</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>New expense</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>What did you spend on?</DialogTitle></DialogHeader>
+
             <ExpenseForm categories={categories} onDone={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["expenses"] }); }} />
           </DialogContent>
         </Dialog>
@@ -77,7 +83,7 @@ function ExpensesPage() {
       <Card className="p-3 flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Search what you spent on..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" aria-label="Search expenses" />
         </div>
         <Select value={filterCat} onValueChange={setFilterCat}>
           <SelectTrigger className="sm:w-56"><SelectValue /></SelectTrigger>
@@ -91,9 +97,14 @@ function ExpensesPage() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={Receipt}
-          title={expenses.length === 0 ? "No expenses yet" : "No matches"}
-          description={expenses.length === 0 ? "Log your first expense to start tracking your spending." : "Try adjusting your search or filter."}
+          title={expenses.length === 0 ? "Let's log your first expense" : "Nothing matched that"}
+          description={
+            expenses.length === 0
+              ? "Every entry you add makes your dashboard, budgets and insights sharper. Start with something you bought today."
+              : "Try a different word, or switch the category filter back to “All categories”."
+          }
         />
+
       ) : (
         <Card className="divide-y overflow-hidden">
           {filtered.map((e) => {
