@@ -156,11 +156,11 @@ function ExpenseForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
-    if (!(amt >= 0)) return toast.error("Enter a valid amount");
-    if (!description.trim()) return toast.error("Description is required");
+    if (!(amt >= 0)) return toast.error("Pop in an amount — even a rough figure works.");
+    if (!description.trim()) return toast.error("Add a short note so you'll recognise this later.");
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSaving(false); return toast.error("Not signed in"); }
+    if (!user) { setSaving(false); return toast.error("Your session ended. Please sign in again."); }
     const { error } = await supabase.from("expenses").insert({
       user_id: user.id,
       amount: amt,
@@ -171,8 +171,9 @@ function ExpenseForm({
       notes: notes.trim() || null,
     });
     setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Expense added");
+    if (error) return toast.error("We couldn't save that expense. Please try once more.");
+    toast.success("Saved — nice work staying on top of it.");
+
     onDone();
   };
 
@@ -180,30 +181,30 @@ function ExpenseForm({
     <form onSubmit={submit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label>Amount</Label>
+          <Label>How much?</Label>
           <Input type="number" step="0.01" min="0" required value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
         <div className="space-y-2">
-          <Label>Date</Label>
+          <Label>When?</Label>
           <Input type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Description</Label>
+        <Label>What was it for?</Label>
         <Input required value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Lunch at Buka" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label>Category</Label>
           <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
             <SelectContent>
               {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Payment</Label>
+          <Label>How did you pay?</Label>
           <Select value={paymentMethod} onValueChange={setPaymentMethod}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -213,10 +214,11 @@ function ExpenseForm({
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Notes (optional)</Label>
-        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+        <Label>Anything to remember? (optional)</Label>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Split with a friend, work trip, etc." />
       </div>
-      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving..." : "Add expense"}</Button>
+      <Button type="submit" className="w-full" disabled={saving}>{saving ? "Saving your expense..." : "Save expense"}</Button>
+
     </form>
   );
 }
