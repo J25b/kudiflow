@@ -29,7 +29,12 @@ function AnalyticsPage() {
           icon={PieChartIcon}
           title="Your charts are waiting"
           description="Log a handful of expenses and this page fills in with clear pictures of your spending by category, day and month."
+          tips={[
+            "About five entries is enough for the category breakdown to be useful.",
+            "Keep logging for a few weeks to see day-of-week and monthly trends.",
+          ]}
         />
+
       </div>
     );
   }

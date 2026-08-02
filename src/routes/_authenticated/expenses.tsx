@@ -103,7 +103,17 @@ function ExpensesPage() {
               ? "Every entry you add makes your dashboard, budgets and insights sharper. Start with something you bought today."
               : "Try a different word, or switch the category filter back to “All categories”."
           }
+          tips={
+            expenses.length === 0
+              ? [
+                  "Amount and a short note — “Lunch at work” is plenty.",
+                  "Pick a category so your charts and budgets stay meaningful.",
+                  "Backdating is fine: just change the date on older receipts.",
+                ]
+              : undefined
+          }
         />
+
 
       ) : (
         <Card className="divide-y overflow-hidden">

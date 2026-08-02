@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowUpRight, Plus, Receipt, TrendingUp, Wallet, Target } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
+import { GettingStarted } from "@/components/GettingStarted";
+import { useEffect, useState } from "react";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   loader: ({ context }) => {
@@ -52,6 +55,11 @@ function Dashboard() {
 
   const empty = expenses.length === 0;
 
+  const [hasInsight, setHasInsight] = useState(false);
+  useEffect(() => {
+    setHasInsight(localStorage.getItem("kudiflow_insight_generated") === "1");
+  }, []);
+
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
@@ -71,6 +79,11 @@ function Dashboard() {
           icon={Wallet}
           title="Welcome to KudiFlow"
           description="Add one expense and this page comes alive — daily totals, budget progress, and where your money actually goes."
+          tips={[
+            "Step 1: log an expense — amount, a short note, a category.",
+            "Step 2: set a monthly budget for the category you worry about most.",
+            "Step 3: ask your money coach for insights whenever you want a nudge.",
+          ]}
           action={
             <Button asChild size="lg"><Link to="/expenses"><Plus className="h-4 w-4 mr-1" /> Log my first expense</Link></Button>
           }
@@ -78,7 +91,14 @@ function Dashboard() {
 
       ) : (
         <>
+          <GettingStarted
+            hasExpense={expenses.length > 0}
+            hasBudget={budgets.length > 0}
+            hasInsight={hasInsight}
+          />
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+
             <StatCard label="Spent today" value={formatCurrency(totalToday, currency)} icon={Receipt} />
             <StatCard label="So far this week" value={formatCurrency(totalWeek, currency)} icon={TrendingUp} />
             <StatCard label="So far this month" value={formatCurrency(totalMonth, currency)} icon={Wallet} highlight />

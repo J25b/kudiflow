@@ -85,7 +85,13 @@ function BudgetsPage() {
           icon={Target}
           title="Give your money a plan"
           description="Pick a category, set what feels comfortable to spend this month, and we'll nudge you before you get close to the line."
+          tips={[
+            "Start with one category — food or transport is a good first pick.",
+            "Base the limit on what you actually spent last month, not the ideal.",
+            "We'll warn you at 80% so there are no end-of-month surprises.",
+          ]}
         />
+
 
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
