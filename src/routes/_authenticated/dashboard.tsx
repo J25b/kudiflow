@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowUpRight, Plus, Receipt, TrendingUp, Wallet, Target } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
+import { GettingStarted } from "@/components/GettingStarted";
+import { useEffect, useState } from "react";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   loader: ({ context }) => {

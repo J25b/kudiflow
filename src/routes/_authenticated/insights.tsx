@@ -17,8 +17,16 @@ function InsightsPage() {
   const fn = useServerFn(generateInsights);
   const mutation = useMutation({
     mutationFn: () => fn(),
+    onSuccess: () => {
+      try {
+        localStorage.setItem("kudiflow_insight_generated", "1");
+      } catch {
+        /* storage unavailable */
+      }
+    },
     onError: () => toast.error("We couldn't put your insights together just now. Please try again in a moment."),
   });
+
 
   const insights = mutation.data as Insights | undefined;
 
