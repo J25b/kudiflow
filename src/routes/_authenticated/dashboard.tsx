@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowUpRight, Plus, Receipt, TrendingUp, Wallet, Target } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { GettingStarted } from "@/components/GettingStarted";
+import { NarrativeSummary } from "@/components/NarrativeSummary";
 import { useEffect, useState } from "react";
 
 
@@ -96,6 +97,8 @@ function Dashboard() {
             hasBudget={budgets.length > 0}
             hasInsight={hasInsight}
           />
+
+          <NarrativeSummary expenses={expenses} budgets={budgets} currency={currency} />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
 
