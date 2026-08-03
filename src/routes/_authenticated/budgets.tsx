@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CardsPageSkeleton } from "@/components/Skeletons";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { budgetsQuery, categoriesQuery, expensesQuery, profileQuery } from "@/lib/queries";
@@ -24,6 +25,9 @@ export const Route = createFileRoute("/_authenticated/budgets")({
   },
   head: () => ({ meta: [{ title: "Budgets — KudiFlow" }] }),
   component: BudgetsPage,
+  pendingComponent: CardsPageSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 300,
 });
 
 function BudgetsPage() {

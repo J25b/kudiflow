@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ListPageSkeleton } from "@/components/Skeletons";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { expensesQuery, categoriesQuery, profileQuery } from "@/lib/queries";
@@ -23,6 +24,9 @@ export const Route = createFileRoute("/_authenticated/expenses")({
   },
   head: () => ({ meta: [{ title: "Expenses — KudiFlow" }] }),
   component: ExpensesPage,
+  pendingComponent: ListPageSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 300,
 });
 
 const PAYMENT_METHODS = ["cash", "card", "bank transfer", "mobile money", "other"];
