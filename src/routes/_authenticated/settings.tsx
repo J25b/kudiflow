@@ -1,4 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { SettingsSkeleton } from "@/components/Skeletons";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { profileQuery } from "@/lib/queries";
@@ -17,6 +18,9 @@ export const Route = createFileRoute("/_authenticated/settings")({
   loader: ({ context }) => context.queryClient.ensureQueryData(profileQuery()),
   head: () => ({ meta: [{ title: "Settings — KudiFlow" }] }),
   component: SettingsPage,
+  pendingComponent: SettingsSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 300,
 });
 
 const CURRENCIES = ["NGN", "USD", "EUR", "GBP", "KES", "GHS", "ZAR"];

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AnalyticsSkeleton } from "@/components/Skeletons";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { expensesQuery, profileQuery } from "@/lib/queries";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,9 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   },
   head: () => ({ meta: [{ title: "Analytics — KudiFlow" }] }),
   component: AnalyticsPage,
+  pendingComponent: AnalyticsSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 300,
 });
 
 function AnalyticsPage() {

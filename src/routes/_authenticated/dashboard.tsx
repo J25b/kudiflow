@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { DashboardSkeleton } from "@/components/Skeletons";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { expensesQuery, budgetsQuery, profileQuery } from "@/lib/queries";
 import { formatCurrency, startOfMonth, startOfWeek, toISODate } from "@/lib/format";
@@ -20,6 +21,9 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   },
   head: () => ({ meta: [{ title: "Dashboard — KudiFlow" }] }),
   component: Dashboard,
+  pendingComponent: DashboardSkeleton,
+  pendingMs: 150,
+  pendingMinMs: 300,
 });
 
 function Dashboard() {
