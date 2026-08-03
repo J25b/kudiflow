@@ -111,6 +111,9 @@ function AnalyticsPage() {
               </div>
             ))}
           </div>
+          <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+            Every expense you've logged, grouped by category. The biggest slice is where small savings add up fastest.
+          </p>
         </Card>
 
         <Card className="p-5">
@@ -126,6 +129,9 @@ function AnalyticsPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+          <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+            One bar per day for the past 14 days. Tall bars show the days your spending spikes — often weekends or paydays.
+          </p>
         </Card>
 
         <Card className="p-5 lg:col-span-2">
@@ -141,6 +147,9 @@ function AnalyticsPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+            Your total spend for each of the last six months. A line that slopes down means your habits are moving in the right direction.
+          </p>
         </Card>
       </div>
     </div>

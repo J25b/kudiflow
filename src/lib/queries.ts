@@ -54,3 +54,17 @@ export const budgetsQuery = () =>
       return data ?? [];
     },
   });
+
+export const insightHistoryQuery = () =>
+  queryOptions({
+    queryKey: ["ai_insights"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_insights")
+        .select("id, content, generated_at, kind")
+        .order("generated_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
