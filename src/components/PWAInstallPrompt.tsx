@@ -95,38 +95,42 @@ export function PWAInstallPrompt() {
 
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 px-4 sm:bottom-6 sm:left-auto sm:right-6 sm:px-0 pointer-events-none">
-      <div className="pointer-events-auto mx-auto sm:mx-0 max-w-md rounded-2xl border bg-card/95 backdrop-blur shadow-[var(--shadow-card)] p-4 flex items-start gap-3">
+      <div
+        role="dialog"
+        aria-label="Keep KudiFlow on your home screen"
+        className="pointer-events-auto mx-auto sm:mx-0 max-w-md rounded-2xl border bg-card/95 backdrop-blur shadow-[var(--shadow-card)] p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500"
+      >
         <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-brand flex items-center justify-center">
-          <Wallet className="h-5 w-5 text-primary-foreground" />
+          <Wallet className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold">Install KudiFlow</p>
+          <p className="text-sm font-semibold">Keep KudiFlow one tap away</p>
           {iosHint && !deferred ? (
             <p className="mt-0.5 text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
-              Tap <Share className="h-3.5 w-3.5 inline" /> Share, then
-              <span className="font-medium">Add to Home Screen</span>.
+              Tap <Share className="h-3.5 w-3.5 inline" aria-hidden="true" /> Share, then
+              <span className="font-medium">Add to Home Screen</span> — it takes a second and KudiFlow opens like a real app.
             </p>
           ) : (
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Add it to your home screen for a faster, full-screen experience.
+              Pop it on your home screen so logging an expense takes seconds — no browser, no waiting.
             </p>
           )}
           {deferred && (
             <div className="mt-3 flex gap-2">
               <Button size="sm" onClick={install} className="bg-gradient-brand text-primary-foreground border-0">
-                <Download className="mr-1.5 h-4 w-4" />
-                Install
+                <Download className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                Add to home screen
               </Button>
               <Button size="sm" variant="ghost" onClick={dismiss}>
-                Not now
+                Maybe later
               </Button>
             </div>
           )}
         </div>
         <button
           onClick={dismiss}
-          aria-label="Dismiss"
-          className="text-muted-foreground hover:text-foreground -mr-1 -mt-1 p-1"
+          aria-label="Close install tip"
+          className="text-muted-foreground hover:text-foreground -mr-1 -mt-1 p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="h-4 w-4" />
         </button>

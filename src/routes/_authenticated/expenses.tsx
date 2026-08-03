@@ -139,7 +139,7 @@ function ExpensesPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="font-semibold">{formatCurrency(Number(e.amount), currency)}</span>
-                  <Button variant="ghost" size="icon" onClick={() => del.mutate(e.id)}>
+                  <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={`Delete ${e.description}`} onClick={() => del.mutate(e.id)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </div>

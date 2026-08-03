@@ -208,7 +208,7 @@ function AuthPage() {
   const strengthOk = mode !== "signup" || scorePassword(password) >= 4;
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+    <div className="min-h-dvh grid lg:grid-cols-2 bg-background">
       {/* Brand panel */}
       <div className="hidden lg:flex relative flex-col justify-between p-12 bg-gradient-brand text-primary-foreground overflow-hidden">
         <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />

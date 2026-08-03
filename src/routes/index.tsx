@@ -94,7 +94,7 @@ function LandingPage() {
   const primaryLabel = signedIn ? "Open dashboard" : "Get started free";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       {/* Nav */}
       <header className="sticky top-0 z-30 border-b bg-background/70 backdrop-blur-xl">
         <div className="mx-auto max-w-6xl flex items-center justify-between px-6 h-16">

@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-dvh bg-background flex">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-64 border-r bg-sidebar text-sidebar-foreground p-4">
         <Link to="/dashboard" className="flex items-center gap-2 px-2 py-4">
@@ -40,7 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="text-xl font-display font-bold">KudiFlow</span>
         </Link>
 
-        <nav className="flex-1 space-y-1 mt-6">
+        <nav className="flex-1 space-y-1 mt-6" aria-label="Main">
           {nav.map((item) => {
             const active = location.pathname.startsWith(item.to);
             const Icon = item.icon;
@@ -48,8 +48,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={item.to}
                 to={item.to}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
                   active
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
@@ -83,13 +84,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="font-display font-bold text-gradient-brand truncate">KudiFlow</span>
           </Link>
           <div className="flex items-center gap-1 shrink-0">
-            <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
+            <Button variant="ghost" size="icon" className="min-h-11 min-w-11" onClick={toggle} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="icon" asChild aria-label="Settings">
+            <Button variant="ghost" size="icon" className="min-h-11 min-w-11" asChild aria-label="Open settings">
               <Link to="/settings"><Settings className="h-4 w-4" /></Link>
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign out">
+            <Button variant="ghost" size="icon" className="min-h-11 min-w-11" onClick={handleSignOut} aria-label="Sign out">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -98,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 pb-20 lg:pb-0">{children}</main>
 
         {/* Mobile bottom nav */}
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t bg-background/95 backdrop-blur">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)]" aria-label="Main">
           <div className="grid grid-cols-5 h-16">
             {nav.slice(0, 5).map((item) => {
               const active = location.pathname.startsWith(item.to);
@@ -107,8 +108,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 text-xs",
+                    "flex flex-col items-center justify-center gap-1 text-xs min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     active ? "text-primary" : "text-muted-foreground",
                   )}
                 >
