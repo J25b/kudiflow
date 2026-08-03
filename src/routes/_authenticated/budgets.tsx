@@ -112,7 +112,7 @@ function BudgetsPage() {
                     <span className="h-3 w-3 rounded-full" style={{ background: cat?.color ?? "#64748b" }} />
                     <h3 className="font-semibold">{cat?.name ?? "Overall"}</h3>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => del.mutate(b.id)}>
+                  <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label="Delete this budget" onClick={() => del.mutate(b.id)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </div>

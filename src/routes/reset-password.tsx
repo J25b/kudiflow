@@ -72,7 +72,7 @@ function ResetPasswordPage() {
   const strengthOk = scorePassword(password) >= 4;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
+    <div className="min-h-dvh flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-brand opacity-10 pointer-events-none" />
       <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
       <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-accent/20 blur-3xl" />
