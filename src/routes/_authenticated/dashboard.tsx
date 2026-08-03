@@ -104,7 +104,7 @@ function Dashboard() {
 
           <NarrativeSummary expenses={expenses} budgets={budgets} currency={currency} />
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
             <StatCard label="Spent today" value={formatCurrency(totalToday, currency)} icon={Receipt} />
             <StatCard label="So far this week" value={formatCurrency(totalWeek, currency)} icon={TrendingUp} />
@@ -130,7 +130,7 @@ function Dashboard() {
           )}
 
 
-          <div className="grid lg:grid-cols-2 gap-4">
+          <div className="grid lg:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold">Where it went this month</h3>
