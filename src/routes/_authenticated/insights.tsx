@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { insightHistoryQuery } from "@/lib/queries";
+import { formatDate } from "@/lib/format";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { generateInsights } from "@/lib/insights.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp, Lightbulb, Loader2 } from "lucide-react";
+import { Sparkles, TrendingUp, Lightbulb, Loader2, History } from "lucide-react";
 import { toast } from "sonner";
 import type { Insights } from "@/lib/insights.server";
 
@@ -15,9 +18,12 @@ export const Route = createFileRoute("/_authenticated/insights")({
 
 function InsightsPage() {
   const fn = useServerFn(generateInsights);
+  const qc = useQueryClient();
+  const history = useQuery(insightHistoryQuery());
   const mutation = useMutation({
     mutationFn: () => fn(),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ai_insights"] });
       try {
         localStorage.setItem("kudiflow_insight_generated", "1");
       } catch {
@@ -97,6 +103,42 @@ function InsightsPage() {
             </Card>
           )}
         </div>
+      )}
+
+      {(history.data?.length ?? 0) > 0 && (
+        <Card className="p-5">
+          <h3 className="font-semibold flex items-center gap-2 mb-2">
+            <History className="h-4 w-4 text-muted-foreground" /> Earlier reads
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            Look back at what your coach said before — handy for spotting whether a habit actually changed.
+          </p>
+          <Accordion type="single" collapsible>
+            {history.data!.map((row) => {
+              const c = (row.content ?? {}) as Partial<Insights>;
+              return (
+                <AccordionItem key={row.id} value={row.id}>
+                  <AccordionTrigger className="text-sm text-left">
+                    {formatDate(row.generated_at)}
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3">
+                    {c.summary && <p className="text-sm leading-relaxed">{c.summary}</p>}
+                    {!!c.recommendations?.length && (
+                      <ul className="space-y-1.5">
+                        {c.recommendations.map((r, i) => (
+                          <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                            <span className="text-accent">•</span>
+                            <span>{typeof r === "string" ? r : JSON.stringify(r)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        </Card>
       )}
     </div>
   );
